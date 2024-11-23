@@ -32,6 +32,11 @@ runs:
         
         # Output the build ID
         echo "build-id=${{ inputs.build-id }}" >> $GITHUB_OUTPUT
+        
+        # Debug
+        pwd
+        ls -lh .
+        cat .dot-deploy-build-id.txt
 
     - name: Upload build-id artifact
       uses: actions/upload-artifact@v4
@@ -39,3 +44,6 @@ runs:
       with:
         name: dot-deploy-build-id
         path: .dot-deploy-build-id.txt
+        if-no-files-found: error
+        overwrite: true
+        include-hidden-files: true
