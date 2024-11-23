@@ -10,7 +10,10 @@ outputs:
     value: ${{ steps.register-build.outputs.build-id }}
   artifact-id:
     description: "Outputs the artifact id where the build id is stored"
-    value: ${{ steps.register-build.outputs.artifact-id }}
+    value: ${{ steps.upload-artifact.outputs.artifact-id }}
+  artifact-url:
+    description: "Outputs the artifact url where the build id is stored"
+    value: ${{ steps.upload-artifact.outputs.artifact-url }}
 runs:
   using: "composite"
   steps:
@@ -26,9 +29,13 @@ runs:
         
         # Create a file with the build ID
         echo "${{ inputs.build-id }}" > .dot-deploy-build-id.txt
+        
+        # Output the build ID
+        echo "::set-output name=build-id::${{ inputs.build-id }}"
 
     - name: Upload build-id artifact
       uses: actions/upload-artifact@v4
+      id: upload-artifact
       with:
         name: dot-deploy-build-id
         path: .dot-deploy-build-id.txt
