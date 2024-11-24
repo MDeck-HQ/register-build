@@ -57,12 +57,14 @@ export async function registerBuildStart() {
     core.debug("Notifying dot-deploy of build start");
 
     const client = new HttpClient("dot-deploy");
-    const url = `${DOT_DEPLOY_API_BASE_URL}/builds/register/start`;
+    const url = `${DOT_DEPLOY_API_BASE_URL}/actions/builds/register`;
     const body = {
       ...metadata,
       artifact_id: id,
       verification_token: verificationToken,
     };
+
+    core.debug(`Registering build start at ${url}`);
 
     const response = await client.postJson<RegisterBuildResponse>(url, body);
 
