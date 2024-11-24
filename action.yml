@@ -20,30 +20,15 @@ runs:
     - name: Create the build-id artifact
       id: register-build
       shell: bash
-      run: |
-        # Check that the build-id is at least one character long and contains no spaces or newlines
-        if [[ ! "${{ inputs.build-id }}" =~ ^[[:print:]]+$ || "${{ inputs.build-id }}" =~ [[:space:]] || -z "${{ inputs.build-id }}" ]]; then
-          echo "Build ID must be at least one character long and contain no spaces, newlines, or control characters" >&2
-          exit 1
-        fi
-        
-        # Create a file with the build ID
-        echo "${{ inputs.build-id }}" > .dot-deploy-build-id.txt
-        
-        # Output the build ID
-        echo "build-id=${{ inputs.build-id }}" >> $GITHUB_OUTPUT
-        
-        # Debug
-        pwd
-        ls -lh .
-        cat .dot-deploy-build-id.txt
+      run: ./register-build.sh ${{ inputs.build-id }}
 
     - name: Upload build-id artifact
       uses: actions/upload-artifact@v4
       id: upload-artifact
       with:
         name: dot-deploy-build-id
-        path: .dot-deploy-build-id.txt
+        path: ${{ steps.register-build.outputs.build-id-file }}
         if-no-files-found: error
         overwrite: true
         include-hidden-files: true
+        compression-level: '0'
