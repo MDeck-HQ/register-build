@@ -13,6 +13,6 @@ outputs:
     description: "Outputs the artifact url where the build id is stored"
 runs:
   using: node20
-  main: "dist/main.js"
-  post: "dist/post.js"
-  pre: "dist/pre.js"
+  main: "dist/main/index.js"
+  post: "dist/post/index.js"
+  pre: "dist/pre/index.js"
