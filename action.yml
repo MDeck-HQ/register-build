@@ -20,7 +20,7 @@ runs:
     - name: Create the build-id artifact
       id: register-build
       shell: bash
-      run: ./register-build.sh ${{ inputs.build-id }}
+      run: register-build.sh ${{ inputs.build-id }}
 
     - name: Upload build-id artifact
       uses: actions/upload-artifact@v4
