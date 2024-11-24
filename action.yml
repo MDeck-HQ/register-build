@@ -23,12 +23,6 @@ runs:
       env:
         GITHUB_ACTION_PATH: ${{ github.action_path }}
 
-    - name: debug
-      run: |
-        echo "GITHUB_ACTION_PATH: $GITHUB_ACTION_PATH"
-        echo "CURRENT_PATH: $(pwd)"
-      shell: bash
-
     - name: Create the build-id artifact
       id: register-build
       shell: bash
