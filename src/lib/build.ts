@@ -65,6 +65,7 @@ export async function registerBuildStart() {
     };
 
     core.debug(`Registering build start at ${url}`);
+    core.debug(`Metadata: ${JSON.stringify(metadata)}`);
 
     const response = await client.postJson<RegisterBuildResponse>(url, body);
 
