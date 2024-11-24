@@ -20,8 +20,8 @@ export function getMetadata() {
   const orgLogin = process.env.GITHUB_REPOSITORY_OWNER;
 
   return {
-    repository_id: repositoryId,
-    workflow_run_id: runId,
+    repository_id: Number(repositoryId),
+    workflow_run_id: Number(runId),
     branch_name: branch,
     org_login: orgLogin,
   };
