@@ -3,10 +3,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import * as os from "node:os";
 import * as core from "@actions/core";
-import {
-  ArtifactNotFoundError,
-  DefaultArtifactClient,
-} from "@actions/artifact";
+import artifact, { ArtifactNotFoundError } from "@actions/artifact";
 import {
   BUILD_ID_FILE_NAME,
   DOT_DEPLOY_API_BASE_URL,
@@ -32,7 +29,7 @@ export function getMetadata() {
 
 async function deleteArtifactIfExists(artifactName: string): Promise<void> {
   try {
-    await new DefaultArtifactClient().deleteArtifact(artifactName);
+    await artifact.deleteArtifact(artifactName);
   } catch (error) {
     if (error instanceof ArtifactNotFoundError) {
       core.debug(`Skipping deletion of '${artifactName}', it does not exist`);
@@ -61,7 +58,6 @@ export async function uploadArtifact({
   const file = path.join(tmpDir, filename);
   await fs.writeFile(file, content);
 
-  const artifact = new DefaultArtifactClient();
   const { id, size } = await artifact.uploadArtifact(name, [file], tmpDir, {
     retentionDays: 1,
     compressionLevel: 0,
