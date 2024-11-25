@@ -13,11 +13,11 @@ async function run() {
     core.debug("Generating build-id");
 
     // Generated build-id is the short commit SHA+random suffixed with the build number
-    const commitSha = process.env.GITHUB_SHA?.substring(0, 4);
-    const buildNumber = process.env.GITHUB_RUN_NUMBER;
+    const commitSha = process.env.GITHUB_SHA?.substring(0, 6);
+    const runAttempt = process.env.GITHUB_RUN_ATTEMPT;
     const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 8);
 
-    if (!commitSha || !buildNumber) {
+    if (!commitSha || !runAttempt) {
       // If the commit SHA or build number is not available, fallback to a random build ID
       // Chance of collision is:
       // 0.18% with 100k builds
@@ -26,14 +26,15 @@ async function run() {
       buildId = nanoid(8);
     } else {
       // The generated build ID is made of the following parts:
-      // - The first 4 characters of the commit SHA (makes it easier to find the commit without querying the API)
-      // - A random 4 character string (to avoid collisions)
-      // - The build number (makes it easier to tell the build by just looking at the build-id, and further avoid collisions)
-      // 4.44% chance of collision with 100k builds
-      // 0.05% chance of collision with 10k builds
+      // - The first 6 characters of the commit SHA (makes it easier to find the commit without querying the API)
+      // - The run number
+      // - The run attempt (differentiates between retries)
       core.debug(`Generating build-id from commit SHA and build number`);
-      const random = nanoid(4);
-      buildId = `${commitSha}${random}-${buildNumber}`;
+      buildId = `${commitSha}${buildId}`;
+
+      if (runAttempt && runAttempt !== "1") {
+        buildId += `-${runAttempt}`;
+      }
     }
 
     core.debug(`Generated build-id: ${buildId}`);
