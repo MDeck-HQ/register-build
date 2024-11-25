@@ -72,17 +72,18 @@ export async function registerBuildStart() {
     if (response.statusCode <= 299) {
       core.debug("Successfully registered build start");
     } else {
-      core.error("Failed to register build start");
-      core.error(`Status: ${response.statusCode}`);
-      core.error(`Body: ${response.result}`);
-      throw new Error("Failed to register build start");
+      core.debug("Failed to register build start");
+      core.debug(`Status: ${response.statusCode}`);
+      core.debug(`Body: ${JSON.stringify(response.result)}`);
+      throw new Error(
+        `Failed to register build start: Got response code ${response.statusCode}`,
+      );
     }
 
     if (response.result?.status !== "ok") {
-      core.error("Failed to register build start");
-      core.error(`Status: ${response.statusCode}`);
-      core.error(`Body: ${response.result}`);
-      return;
+      core.debug(`Status: ${response.statusCode}`);
+      core.debug(`Body: ${JSON.stringify(response.result)}`);
+      throw new Error("Failed to register build start");
     }
 
     core.saveState("build_id", id);
@@ -92,6 +93,7 @@ export async function registerBuildStart() {
     core.saveState("verification_token", verificationToken);
   } catch (error) {
     core.error("Error registering build start");
+    core.setFailed(error as Error);
     throw error;
   } finally {
     if (tmpDir) {
