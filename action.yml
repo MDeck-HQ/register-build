@@ -1,16 +1,21 @@
 name: 'Register Build'
-description: 'Register a build for use with dot.Deploy. See the documentation for more information.'
+description: |
+  Register a build for use with dot.Deploy. See the documentation for more information.
+  This action to be placed at any point in your workflow. It uses pre-processing and post-processing to make sure that
+  the build ID is registered correctly. This action will upload an artifact named "dot-deploy" to the GitHub artifact store.
 inputs:
   build-id:
-    description: 'The build id to register'
+    description: |
+      The build ID is a unique identifier that is used to reference a build. When deploying, the build ID is used to specify which build to deploy.
+      If your build produces more than one artifact, you have to devise a way to link them all to the same build ID. This could be, for example, by
+      uploading a JSON file that lists the linked artifacts.
+      
+      You can use the special value "auto" to have the action generate a build ID for you. This is useful if you don't want to bother with generating
+      a build ID yourself.
     required: true
 outputs:
   build-id:
-    description: "Outputs the same build id that was input"
-  artifact-id:
-    description: "Outputs the artifact id where the build id is stored"
-  artifact-url:
-    description: "Outputs the artifact url where the build id is stored"
+    description: "Outputs the build ID that was registered"
 runs:
   using: node20
   main: "dist/main/index.js"

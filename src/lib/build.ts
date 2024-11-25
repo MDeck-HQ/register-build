@@ -6,6 +6,7 @@ import * as os from "node:os";
 import * as core from "@actions/core";
 import { DefaultArtifactClient } from "@actions/artifact";
 import {
+  BUILD_ID_FILE_NAME,
   DOT_DEPLOY_API_BASE_URL,
   DOT_DEPLOY_ARTIFACT_NAME,
   VERIFICATION_TOKEN_FILE_NAME,
@@ -27,31 +28,41 @@ export function getMetadata() {
   };
 }
 
+export async function uploadArtifact({
+  name,
+  content,
+  filename,
+}: {
+  name: string;
+  filename: string;
+  content: string;
+}) {
+  const appPrefix = "dot-deploy";
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), appPrefix));
+  const file = path.join(tmpDir, filename);
+  await fs.writeFile(file, content);
+
+  const artifact = new DefaultArtifactClient();
+  const { id, size } = await artifact.uploadArtifact(name, [file], tmpDir, {
+    retentionDays: 1,
+    compressionLevel: 0,
+  });
+
+  return { id, size };
+}
+
 export async function registerBuildStart() {
   const metadata = getMetadata();
   const verificationToken = nanoid(32);
-  const appPrefix = "dot-deploy";
   let tmpDir: string = "";
 
   // Save the metadata to a temp file and upload it to the build artifact
   try {
-    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), appPrefix));
-    const verificationTokenFile = path.join(
-      tmpDir,
-      VERIFICATION_TOKEN_FILE_NAME,
-    );
-    await fs.writeFile(verificationTokenFile, verificationToken);
-
-    const artifact = new DefaultArtifactClient();
-    const { id, size } = await artifact.uploadArtifact(
-      DOT_DEPLOY_ARTIFACT_NAME,
-      [verificationTokenFile],
-      tmpDir,
-      {
-        retentionDays: 1,
-        compressionLevel: 0,
-      },
-    );
+    const { id, size } = await uploadArtifact({
+      name: DOT_DEPLOY_ARTIFACT_NAME,
+      filename: VERIFICATION_TOKEN_FILE_NAME,
+      content: verificationToken,
+    });
 
     core.debug(`Created artifact ${id} with size ${size}`);
     core.debug("Notifying dot-deploy of build start");
@@ -102,4 +113,26 @@ export async function registerBuildStart() {
       });
     }
   }
+}
+
+export async function registerBuildId() {
+  const buildId = core.getState("build_id");
+
+  if (!buildId) {
+    throw new Error("Build ID not found.");
+  }
+
+  const { size, id } = await uploadArtifact({
+    name: DOT_DEPLOY_ARTIFACT_NAME,
+    filename: BUILD_ID_FILE_NAME,
+    content: buildId,
+  });
+
+  core.debug(`Created artifact ${id} with size ${size}`);
+  core.debug(`Registered build ID ${buildId}`);
+  return {
+    id,
+    size,
+    buildId,
+  };
 }

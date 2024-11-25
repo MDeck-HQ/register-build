@@ -25675,7 +25675,50 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(7484));
-async function run() { }
+const non_secure_1 = __nccwpck_require__(9802);
+async function run() {
+    core.debug("Checking provided build-id");
+    let buildId = core.getInput("build-id");
+    if (!buildId) {
+        throw new Error("build-id is required");
+    }
+    // Generate a build ID if value is "auto"
+    if (buildId === "auto") {
+        core.debug("Generating build-id");
+        // Generated build-id is the short commit SHA+random suffixed with the build number
+        const commitSha = process.env.GITHUB_SHA?.substring(0, 4);
+        const buildNumber = process.env.GITHUB_RUN_NUMBER;
+        const nanoid = (0, non_secure_1.customAlphabet)("abcdefghijklmnopqrstuvwxyz0123456789", 8);
+        if (!commitSha || !buildNumber) {
+            // If the commit SHA or build number is not available, fallback to a random build ID
+            // Chance of collision is:
+            // 0.18% with 100k builds
+            // 0.002% with 10k builds
+            core.debug(`Generating random build-id`);
+            buildId = nanoid(8);
+        }
+        else {
+            // The generated build ID is made of the following parts:
+            // - The first 4 characters of the commit SHA (makes it easier to find the commit without querying the API)
+            // - A random 4 character string (to avoid collisions)
+            // - The build number (makes it easier to tell the build by just looking at the build-id, and further avoid collisions)
+            // 4.44% chance of collision with 100k builds
+            // 0.05% chance of collision with 10k builds
+            core.debug(`Generating build-id from commit SHA and build number`);
+            const random = nanoid(4);
+            buildId = `${commitSha}${random}-${buildNumber}`;
+        }
+        core.debug(`Generated build-id: ${buildId}`);
+    }
+    else {
+        // Build ID must be between 1 and 100 characters long and can only contain sensible characters.
+        // Characters allowed: a-z, A-Z, 0-9, [-_.$#:;]
+        if (!/^[a-zA-Z0-9\-_.$#:;]{1,100}$/.test(buildId)) {
+            throw new Error("Invalid build-id. Must be between 1 and 100 characters long and can only contain alphanumeric characters, and the following special characters: -_.$#:;");
+        }
+    }
+    core.saveState("build_id", buildId);
+}
 run().catch(e => {
     core.setFailed(e.message);
 });
@@ -27546,6 +27589,39 @@ function parseParams (str) {
 module.exports = parseParams
 
 
+/***/ }),
+
+/***/ 9802:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   customAlphabet: () => (/* binding */ customAlphabet),
+/* harmony export */   nanoid: () => (/* binding */ nanoid)
+/* harmony export */ });
+let urlAlphabet =
+  'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict'
+let customAlphabet = (alphabet, defaultSize = 21) => {
+  return (size = defaultSize) => {
+    let id = ''
+    let i = size
+    while (i--) {
+      id += alphabet[(Math.random() * alphabet.length) | 0]
+    }
+    return id
+  }
+}
+let nanoid = (size = 21) => {
+  let id = ''
+  let i = size
+  while (i--) {
+    id += urlAlphabet[(Math.random() * 64) | 0]
+  }
+  return id
+}
+
+
 /***/ })
 
 /******/ 	});
@@ -27581,6 +27657,34 @@ module.exports = parseParams
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
