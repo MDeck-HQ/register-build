@@ -1,4 +1,3 @@
-// @ts-check
 import { nanoid } from "nanoid";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
