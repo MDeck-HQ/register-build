@@ -144,7 +144,7 @@ export async function registerBuildId() {
   });
 
   core.debug(`Created artifact ${id} with size ${size}`);
-  core.debug(`Registered build ID ${buildId}`);
+  core.info(`Registered build ID ${buildId}`);
   return {
     id,
     size,
