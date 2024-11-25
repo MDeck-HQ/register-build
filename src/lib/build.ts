@@ -3,7 +3,10 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import * as os from "node:os";
 import * as core from "@actions/core";
-import { DefaultArtifactClient } from "@actions/artifact";
+import {
+  ArtifactNotFoundError,
+  DefaultArtifactClient,
+} from "@actions/artifact";
 import {
   BUILD_ID_FILE_NAME,
   DOT_DEPLOY_API_BASE_URL,
@@ -27,6 +30,20 @@ export function getMetadata() {
   };
 }
 
+async function deleteArtifactIfExists(artifactName: string): Promise<void> {
+  try {
+    await new DefaultArtifactClient().deleteArtifact(artifactName);
+  } catch (error) {
+    if (error instanceof ArtifactNotFoundError) {
+      core.debug(`Skipping deletion of '${artifactName}', it does not exist`);
+      return;
+    }
+
+    // Best effort, we don't want to fail the action if this fails
+    core.debug(`Unable to delete artifact: ${(error as Error).message}`);
+  }
+}
+
 export async function uploadArtifact({
   name,
   content,
@@ -36,6 +53,9 @@ export async function uploadArtifact({
   filename: string;
   content: string;
 }) {
+  // First try to delete the artifact if it exists
+  await deleteArtifactIfExists(name);
+
   const appPrefix = "dot-deploy";
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), appPrefix));
   const file = path.join(tmpDir, filename);
