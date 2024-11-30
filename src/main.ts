@@ -49,7 +49,7 @@ async function run() {
     }
   }
 
-  core.saveState("build_id", buildId);
+  core.saveState("build_number", buildId);
 }
 
 run().catch(e => {

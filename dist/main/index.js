@@ -25718,7 +25718,7 @@ async function run() {
             throw new Error("Invalid build-id. Must be between 1 and 100 characters long and can only contain alphanumeric characters, and the following special characters: -_.$#:;");
         }
     }
-    core.saveState("build_id", buildId);
+    core.saveState("build_number", buildId);
 }
 run().catch(e => {
     core.setFailed(e.message);

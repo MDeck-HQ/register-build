@@ -134,12 +134,13 @@ export async function registerBuildStart() {
 
 export async function registerBuildId() {
   const buildId = core.getState("dd_build_id");
+  const buildNumber = core.getState("build_number");
 
   if (!buildId) {
     throw new Error("Build ID not found.");
   }
 
-  const content = JSON.stringify({ build_number: buildId, id: buildId });
+  const content = JSON.stringify({ build_number: buildNumber, id: buildId });
 
   const { size, id } = await uploadArtifact({
     name: DOT_DEPLOY_ARTIFACT_NAME,
