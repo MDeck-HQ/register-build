@@ -112,7 +112,9 @@ export async function registerBuildStart() {
       throw new Error("Failed to register build start");
     }
 
-    core.saveState("build_id", id);
+    const build_id = response.result.build?.id;
+
+    core.saveState("dd_build_id", build_id);
     core.setOutput("artifact_id", id);
     core.setOutput("verification_token", verificationToken);
     core.saveState("artifact_id", id);
@@ -131,16 +133,18 @@ export async function registerBuildStart() {
 }
 
 export async function registerBuildId() {
-  const buildId = core.getState("build_id");
+  const buildId = core.getState("dd_build_id");
 
   if (!buildId) {
     throw new Error("Build ID not found.");
   }
 
+  const content = JSON.stringify({ build_number: buildId, id: buildId });
+
   const { size, id } = await uploadArtifact({
     name: DOT_DEPLOY_ARTIFACT_NAME,
     filename: BUILD_ID_FILE_NAME,
-    content: buildId,
+    content: content,
   });
 
   core.debug(`Created artifact ${id} with size ${size}`);
