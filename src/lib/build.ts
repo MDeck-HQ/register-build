@@ -140,7 +140,7 @@ export async function registerBuildId() {
     throw new Error("Build ID not found.");
   }
 
-  const content = JSON.stringify({ build_number: buildNumber, id: buildId });
+  const content = JSON.stringify({ version: buildNumber, id: buildId });
 
   const { size, id } = await uploadArtifact({
     name: DOT_DEPLOY_ARTIFACT_NAME,
