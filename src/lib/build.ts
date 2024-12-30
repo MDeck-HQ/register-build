@@ -112,10 +112,9 @@ export async function registerBuildStart() {
       throw new Error("Failed to register build start");
     }
 
-    const build_version = response.result.build?.id;
+    const build_id = response.result.build?.id;
 
-    core.saveState("version", build_version);
-    core.setOutput("version", build_version);
+    core.saveState("build_id", build_id);
     core.saveState("artifact_id", id);
     core.saveState("verification_token", verificationToken);
   } catch (error) {
@@ -132,7 +131,7 @@ export async function registerBuildStart() {
 }
 
 export async function registerBuildId() {
-  const buildId = core.getState("version");
+  const buildId = core.getState("build_id");
   const buildVersion = core.getState("version");
 
   if (!buildId) {
