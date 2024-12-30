@@ -50,6 +50,7 @@ async function run() {
   }
 
   core.saveState("version", buildId);
+  core.setOutput("version", buildId);
 }
 
 run().catch(e => {
