@@ -25677,48 +25677,48 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(7484));
 const non_secure_1 = __nccwpck_require__(9802);
 async function run() {
-    core.debug("Checking provided build-id");
-    let buildId = core.getInput("build-id");
+    core.debug("Checking provided build version");
+    let buildId = core.getInput("version");
     if (!buildId) {
-        throw new Error("build-id is required");
+        throw new Error("version is required");
     }
-    // Generate a build ID if value is "auto"
+    // Generate a build version if value is "auto"
     if (buildId === "auto") {
-        core.debug("Generating build-id");
-        // Generated build-id is the short commit SHA+random suffixed with the build number
+        core.debug("Generating build version");
+        // Generated version is the short commit SHA+random suffixed with the build number
         const commitSha = process.env.GITHUB_SHA?.substring(0, 6);
         const runAttempt = process.env.GITHUB_RUN_ATTEMPT;
         const runNumber = process.env.GITHUB_RUN_NUMBER;
         const nanoid = (0, non_secure_1.customAlphabet)("abcdefghijklmnopqrstuvwxyz0123456789", 8);
         if (!commitSha || !runAttempt || !runNumber) {
-            // If the commit SHA or build number is not available, fallback to a random build ID
+            // If the commit SHA or build number is not available, fallback to a random build version
             // Chance of collision is:
             // 0.18% with 100k builds
             // 0.002% with 10k builds
-            core.debug(`Generating random build-id`);
+            core.debug(`Generating semi-random build version`);
             buildId = nanoid(8);
         }
         else {
-            // The generated build ID is made of the following parts:
+            // The generated build version is made of the following parts:
             // - The first 6 characters of the commit SHA (makes it easier to find the commit without querying the API)
             // - The run number
             // - The run attempt (differentiates between retries)
-            core.debug(`Generating build-id from commit SHA and build number`);
+            core.debug(`Generating version from commit SHA and build number`);
             buildId = `${commitSha}${runNumber}`;
             if (runAttempt && runAttempt !== "1") {
                 buildId += `-${runAttempt}`;
             }
         }
-        core.debug(`Generated build-id: ${buildId}`);
+        core.debug(`Generated build version: ${buildId}`);
     }
     else {
-        // Build ID must be between 1 and 100 characters long and can only contain sensible characters.
+        // Build version must be between 1 and 100 characters long and can only contain sensible characters.
         // Characters allowed: a-z, A-Z, 0-9, [-_.$#:;]
         if (!/^[a-zA-Z0-9\-_.$#:;]{1,100}$/.test(buildId)) {
-            throw new Error("Invalid build-id. Must be between 1 and 100 characters long and can only contain alphanumeric characters, and the following special characters: -_.$#:;");
+            throw new Error("Invalid version. Must be between 1 and 100 characters long and can only contain alphanumeric characters, and the following special characters: -_.$#:;");
         }
     }
-    core.saveState("build_number", buildId);
+    core.saveState("version", buildId);
 }
 run().catch(e => {
     core.setFailed(e.message);

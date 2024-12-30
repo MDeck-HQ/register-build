@@ -5,7 +5,7 @@ import * as os from "node:os";
 import * as core from "@actions/core";
 import artifact, { ArtifactNotFoundError } from "@actions/artifact";
 import {
-  BUILD_ID_FILE_NAME,
+  BUILD_VERSION_FILE_NAME,
   DOT_DEPLOY_API_BASE_URL,
   DOT_DEPLOY_ARTIFACT_NAME,
   VERIFICATION_TOKEN_FILE_NAME,
@@ -112,11 +112,10 @@ export async function registerBuildStart() {
       throw new Error("Failed to register build start");
     }
 
-    const build_id = response.result.build?.id;
+    const build_version = response.result.build?.id;
 
-    core.saveState("dd_build_id", build_id);
-    core.setOutput("artifact_id", id);
-    core.setOutput("verification_token", verificationToken);
+    core.saveState("version", build_version);
+    core.setOutput("version", build_version);
     core.saveState("artifact_id", id);
     core.saveState("verification_token", verificationToken);
   } catch (error) {
@@ -133,23 +132,23 @@ export async function registerBuildStart() {
 }
 
 export async function registerBuildId() {
-  const buildId = core.getState("dd_build_id");
-  const buildNumber = core.getState("build_number");
+  const buildId = core.getState("version");
+  const buildVersion = core.getState("version");
 
   if (!buildId) {
-    throw new Error("Build ID not found.");
+    throw new Error("Build version not found.");
   }
 
-  const content = JSON.stringify({ version: buildNumber, id: buildId });
+  const content = JSON.stringify({ version: buildVersion, id: buildId });
 
   const { size, id } = await uploadArtifact({
     name: DOT_DEPLOY_ARTIFACT_NAME,
-    filename: BUILD_ID_FILE_NAME,
+    filename: BUILD_VERSION_FILE_NAME,
     content: content,
   });
 
   core.debug(`Created artifact ${id} with size ${size}`);
-  core.info(`Registered build ID ${buildId}`);
+  core.info(`Registered build version ${buildId}`);
   return {
     id,
     size,
