@@ -155,17 +155,20 @@ export async function registerBuildId() {
   };
 }
 
-export async function writeBuildSummary() {
-  const buildVersion = core.getState("version");
+export type BuildInfo = {
+  version: string;
+};
+
+export async function writeBuildSummary({ version }: BuildInfo) {
   const repoName = process.env.GITHUB_REPOSITORY!.split("/")[1].toLowerCase();
 
   const summary = [
     "## dot.Deploy Build Info",
-    `The build version \`${buildVersion}\` was registered with dot.Deploy`,
+    `The build version \`${version}\` was registered with dot.Deploy`,
     "You can run the following commands on Slack to interact with this build:",
-    `  - \`/dd repo deploy -b ${buildVersion} -r ${repoName} -e <your-environment>\`: Deploy the build to an environment`,
-    `  - \`/dd build describe -b ${buildVersion} -r ${repoName}\`: View information about this build`,
-    `  - \`/dd build taint -b ${buildVersion} -r ${repoName} -m <reason> \`: Mark the build as bad`,
+    `  - \`/dd repo deploy -b ${version} -r ${repoName} -e <your-environment>\`: Deploy the build to an environment`,
+    `  - \`/dd build describe -b ${version} -r ${repoName}\`: View information about this build`,
+    `  - \`/dd build taint -b ${version} -r ${repoName} -m <reason> \`: Mark the build as bad`,
   ];
 
   core.summary.addRaw(summary.join("\n"), true);
