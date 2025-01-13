@@ -1,5 +1,6 @@
 import * as core from "@actions/core";
 import { customAlphabet } from "nanoid/non-secure";
+import { writeBuildSummary } from "./lib/build";
 
 async function run() {
   core.debug("Checking provided build version");
@@ -51,6 +52,7 @@ async function run() {
 
   core.saveState("version", buildId);
   core.setOutput("version", buildId);
+  await writeBuildSummary();
 }
 
 run().catch(e => {

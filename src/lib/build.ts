@@ -154,3 +154,20 @@ export async function registerBuildId() {
     buildId,
   };
 }
+
+export async function writeBuildSummary() {
+  const buildVersion = core.getState("version");
+  const repoName = process.env.GITHUB_REPOSITORY!.split("/")[1].toLowerCase();
+
+  const summary = [
+    "## dot.Deploy Build Info",
+    `The build version \`${buildVersion}\` was registered with dot.Deploy`,
+    "You can run the following commands on Slack to interact with this build:",
+    `  - \`/dd repo deploy -b ${buildVersion} -r ${repoName} -e <your-environment>\`: Deploy the build to an environment`,
+    `  - \`/dd build describe -b ${buildVersion} -r ${repoName}\`: View information about this build`,
+    `  - \`/dd build taint -b ${buildVersion} -r ${repoName} -m <reason> \`: Mark the build as bad`,
+  ];
+
+  core.summary.addRaw(summary.join("\n"), true);
+  await core.summary.write();
+}
